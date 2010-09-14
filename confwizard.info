@@ -1,0 +1,10 @@
+; $Id$
+; Info file for Features Conf Wizard
+name = Features Conf Wizard
+core = 6.x
+description = Help post-feature configuration
+
+dependencies[] = features
+dependencies[] = ctools
+package = Features
+

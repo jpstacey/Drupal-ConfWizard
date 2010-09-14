@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * @file confwizard.install
+ * Install file for confwizard
+ */
+
+/**
+ * Implementation of hook_install
+ */
+function confwizard_install() {
+  drupal_install_schema('confwizard');
+}
+
+/**
+ * Implementation of hook_uninstall
+ */
+function confwizard_uninstall() {
+  drupal_uninstall_schema('confwizard');
+}
+
+
+/**
+ * Implementation of hook_schema
+ */
+function confwizard_schema() {
+  $schema['confwizard_url'] = array(
+    'description' => 'URLs for conf wizard',
+    'export' => array(
+      'key' => 'name',
+      'identifier' => 'cw_url',
+      'default hook' => 'default_confwizard_cw_url',  // Function hook name
+      'api' => array(
+        'owner' => 'confwizard',
+        'api' => 'default_confwizard_cw_url',  // Base name for api include files
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'name' => array(
+        'description' => 'Unique name for exporting',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ),
+      'label' => array(
+        'description' => 'Label for admin interface',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+      ),
+      'url' => array(
+        'description' => 'URL to take people to and aid configuration',
+        'type' => 'varchar',
+        'length' => 4096,
+        'not null' => TRUE,
+      ),
+      'done' => array(
+        'description' => 'Has this configuration been marked as done? Note: not part of the feature component',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'no export' => TRUE,
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+  return $schema;
+}
