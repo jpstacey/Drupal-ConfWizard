@@ -2,5 +2,44 @@
 
 /**
  * @file confwizard.module
+ * Feature Config Wizard
  */
 
+
+/**
+ * Implementation of hook_perm
+ */
+function confwizard_perm() {
+  return array('administer confwizard', 'follow confwizard');
+}
+
+
+/**
+ * Implementation of hook_menu
+ */
+function confwizard_menu() {
+  $items['admin/build/features/confwizard'] = array(
+    'title' => 'Config Wizard',
+
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('confwizard_form_admin_settings'),
+
+    'access arguments' => array('administer confwizard'),
+
+    'file' => 'confwizard.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+  );
+
+  return $items;
+}
+
+/**
+ * Menu access callback
+ */
+function _confwizard_access_admin($perms) {
+  foreach($perms as $perm) {
+    $access |= user_access($perm);
+  }
+  return $access;
+}

@@ -50,14 +50,26 @@ function confwizard_schema() {
         'length' => 256,
         'not null' => TRUE,
       ),
-      'url' => array(
-        'description' => 'URL to take people to and aid configuration',
+      'path' => array(
+        'description' => 'Internal URL to take people to and aid configuration',
         'type' => 'varchar',
         'length' => 4096,
         'not null' => TRUE,
       ),
+      'descr' => array(
+        'description' => 'More information where appropriate',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'feature' => array(
+        'description' => 'Which feature brought this in? Note: not part of the exportable.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'no export' => TRUE,
+      ),
       'done' => array(
-        'description' => 'Has this configuration been marked as done? Note: not part of the feature component',
+        'description' => 'Has this configuration been marked as done? Note: not part of the exportable.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
