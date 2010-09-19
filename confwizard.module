@@ -12,6 +12,26 @@ function confwizard_perm() {
   return array('administer confwizard', 'follow confwizard');
 }
 
+
+/**
+ * Implementation of hook_help
+ */
+function confwizard_help($path, $arg) {
+  switch($path) {
+    case "admin/settings/features":
+      return t("Here you can configure any features which have been installed recently, if they need configuring. Click on the links to go to the relevant configuration pages.");
+    break;
+    case "admin/settings":
+      $status = confwizard_requirements("runtime");
+      $sev = $status['confwizard']['severity'];
+      if (isset($sev) && $sev > REQUIREMENT_OK) {
+        drupal_set_message($status['confwizard']['value'], ($sev > REQUIREMENT_WARNING ? "error" : "warning"));
+      }
+    break;
+  }
+
+}
+
 /**
  * Implementation of hook_menu
  */
