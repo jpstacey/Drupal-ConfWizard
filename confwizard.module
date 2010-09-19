@@ -5,7 +5,6 @@
  * Feature Config Wizard
  */
 
-
 /**
  * Implementation of hook_perm
  */
@@ -13,13 +12,26 @@ function confwizard_perm() {
   return array('administer confwizard', 'follow confwizard');
 }
 
-
 /**
  * Implementation of hook_menu
  */
 function confwizard_menu() {
+  $items['admin/settings/features'] = array(
+    'title' => 'Features',
+    'description' => 'Configure any installed features on your site',
+
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('confwizard_form_follow'),
+
+    'access arguments' => array('follow confwizard'),
+
+    'file' => 'confwizard.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
   $items['admin/build/features/confwizard'] = array(
     'title' => 'Config Wizard',
+    'description' => 'Package up configuration instructions for your features',
 
     'page callback' => 'drupal_get_form',
     'page arguments' => array('confwizard_form_admin_settings'),
@@ -42,4 +54,28 @@ function _confwizard_access_admin($perms) {
     $access |= user_access($perm);
   }
   return $access;
+}
+
+/**
+ * Implementation of hook_requirements
+ */
+function confwizard_requirements($phase) {
+  if ($phase != "runtime") { return; }
+
+  $requirements['confwizard'] = array(
+    'title' => t("Features Config Wizard"),
+    'value' => t('All features are currently fully configured'),
+    'severity' => REQUIREMENT_OK
+  );
+
+  module_load_include("inc", "confwizard", "confwizard.admin");
+  $follows = confwizard_db_get_urls();
+  foreach($follows as $follow) {
+    if (!$follow['done']) {
+      $requirements['confwizard']['value'] = t('Some features installed on your site are not currently configured. ')
+        . l('Please click here to configure these features.', 'admin/settings/features');
+      $requirements['confwizard']['severity'] = REQUIREMENT_WARNING;
+    }
+  }
+  return $requirements;
 }

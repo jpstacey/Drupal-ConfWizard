@@ -95,6 +95,84 @@ function confwizard_form_admin_settings_submit(&$form, &$form_state) {
     }
   }
 }
+
+/**
+ * Form API callback: follow config
+ */
+function confwizard_form_follow(&$form_state) {
+  // Get all follows, ordered by unique name, and save into form
+  $follows = confwizard_db_get_urls();
+  $form['#confwizard'] = array(
+    'follows' => $follows,
+  );
+
+  // Loop over them to produce a hierarchy of doneness and modules
+  $all = array('to do' => array(), 'done' => array());
+  foreach($follows as $n => $follow) {
+    if ($follow['done']) { 
+      $all['done']['confwizard'][$n] = $follow; 
+    }
+    elseif ($follow['feature']) {
+      $all['to do'][$follow['feature']][$n] = $follow;
+    }
+    else {
+      $all['to do']['confwizard'][$n] = $follow;
+    }
+  }
+
+  $all_modules = module_rebuild_cache();
+  // Nice hierarchical set of instructions based on doneness
+  // and module that supports it
+  foreach($all as $is_done => $modules) {
+    $f = array(
+      '#title' => t(ucfirst($is_done)),
+      '#type' => 'fieldset',
+    );
+    foreach($modules as $mod => $follows) {
+      $m = array(
+        '#title' => $mod,
+        '#type' => 'fieldset',
+      );
+
+      // Set friendly title if we can find one
+      if ($all_modules[$mod]->info['name']) {
+        $m['#title'] = $all_modules[$mod]->info['name'];
+      }
+      foreach($follows as $n => $follow) {
+        $m[$n] = array(
+          '#type' => 'checkbox',
+          '#title' => t($follow['label']) . ": " . l($follow['path'], $follow['path']),
+          '#description' => $follow['descr'],
+          '#confwizard_label' => $follow['label'],
+          '#confwizard_path' => $follow['path'],
+          '#default_value' => $follow['done'],
+        );
+      } 
+      element_children($m) && ($f[$mod] = $m);
+    }
+    element_children($f) && ($form[$is_done] = $f);
+  }
+
+  $form['update'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form API submit callback: saving done statuses
+ */
+function confwizard_form_follow_submit(&$form, &$form_state) {
+  // Save based on ID
+  $new = array();
+  foreach($form['#confwizard']['follows'] as $name => $old) {
+    $new = array('done' => $form_state['values'][$name], 'name' => $name);
+    drupal_write_record('confwizard_url', $new, array('name'));
+  }
+}
+
 /**
  * Get URLs from the database
  */
