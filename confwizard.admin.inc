@@ -19,7 +19,7 @@ function confwizard_form_admin_settings(&$form_state) {
   }
 
   foreach($conf_urls as $name => $conf_url) {
-    $form[$name] = array(
+    $form[urlencode($name)] = array(
       '#type' => 'fieldset',
       '#title' => $conf_url['label'] ? $conf_url['label'] : "New config wizard hint",
 
