@@ -139,7 +139,7 @@ function confwizard_form_follow(&$form_state) {
         $m['#title'] = $all_modules[$mod]->info['name'];
       }
       foreach($follows as $n => $follow) {
-        $m[$n] = array(
+        $m[urlencode($n)] = array(
           '#type' => 'checkbox',
           '#title' => t($follow['label']) . ": " . l($follow['path'], $follow['path']),
           '#description' => $follow['descr'],
@@ -165,10 +165,17 @@ function confwizard_form_follow(&$form_state) {
  * Form API submit callback: saving done statuses
  */
 function confwizard_form_follow_submit(&$form, &$form_state) {
+  $urls = confwizard_db_get_urls();
+
   // Save based on ID
   $new = array();
   foreach($form['#confwizard']['follows'] as $name => $old) {
-    $new = array('done' => $form_state['values'][$name], 'name' => $name);
+    $new = array('done' => $form_state['values'][urlencode($name)], 'name' => $name);
+    // If they're from a hook, then they won't be in the db to be written
+    if ($urls[$name]["from_hook"]) {
+      $pre_write = $urls[$name];
+      drupal_write_record('confwizard_url', $pre_write);
+    }
     drupal_write_record('confwizard_url', $new, array('name'));
   }
 }
@@ -177,8 +184,24 @@ function confwizard_form_follow_submit(&$form, &$form_state) {
  * Get URLs from the database
  */
 function confwizard_db_get_urls() {
-  $result = db_query("SELECT * FROM {confwizard_url}");
   $urls = array();
+
+  // Add URLs from hook
+  $files = drupal_system_listing('\.module$', 'modules', 'name', 0);
+  foreach($files as $filename => $file) {
+    $file->info = drupal_parse_info_file(dirname($file->filename) .'/'. $file->name .'.info');
+    if ($file->info['features']['confwizard_url']) {
+      module_load_include("inc", $file->name, $file->name.".default_confwizard_cw_url");
+      foreach (module_invoke($file->name, 'default_confwizard_cw_url') as $name => $obj) {
+        $urls[$name] = (array)$obj;
+        $urls[$name]["from_hook"] = TRUE;
+      }
+    }
+  }
+
+
+  $result = db_query("SELECT * FROM {confwizard_url}");
+
   while($row = db_fetch_array($result)) {
     $urls[$row['name']] = $row;
   }
