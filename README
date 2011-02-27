@@ -1,0 +1,17 @@
+Features Conf Wizard
+====================
+
+This project is now hosted at http://drupal.org/project/featuresconfwizard .
+
+Feature exporting can't always capture every configuration option, 
+especially when configuration depends strongly on the "business rules" 
+already set up on a site (or stored in the brains of the site 
+administrators.)
+
+This module allows you to distribute configuration reminders with your 
+feature. When the feature is installed on a new site, these reminders get 
+added to a to-do list in the admin interface, and admin users will be 
+notified as long as there are to-do items still remaining to be checked off 
+on the list.
+
+(Originally a Github project: https://github.com/jpstacey/Drupal-ConfWizard)
